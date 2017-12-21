@@ -167,12 +167,7 @@ public class Util {
         }
       }
     }
-    return new Iterable<Entrypoint>() {
-      @Override
-      public Iterator<Entrypoint> iterator() {
-        return result.iterator();
-      }
-    };
+    return result::iterator;
   }
 
   /**
@@ -193,7 +188,7 @@ public class Util {
   /**
    * @return Entrypoints for a set of J2SE Main classes
    * @throws IllegalArgumentException if classNames == null
-   * @throws IllegalArgumentException if (classNames != null) and (0 < classNames.length) and (classNames[0] == null)
+   * @throws IllegalArgumentException if (classNames != null) and (0 &lt; classNames.length) and (classNames[0] == null)
    * @throws IllegalArgumentException if classNames.length == 0
    */
   public static Iterable<Entrypoint> makeMainEntrypoints(final ClassLoaderReference loaderRef, final IClassHierarchy cha,
@@ -209,41 +204,38 @@ public class Util {
       throw new IllegalArgumentException("(0 < classNames.length) and (classNames[0] == null)");
     }
 
-    for (int i = 0; i < classNames.length; i++) {
-      if (classNames[i].indexOf("L") != 0) {
-        throw new IllegalArgumentException("Expected class name to start with L " + classNames[i]);
+    for (String className : classNames) {
+      if (className.indexOf("L") != 0) {
+        throw new IllegalArgumentException("Expected class name to start with L " + className);
       }
-      if (classNames[i].indexOf(".") > 0) {
-        Assertions.productionAssertion(false, "Expected class name formatted with /, not . " + classNames[i]);
+      if (className.indexOf(".") > 0) {
+        Assertions.productionAssertion(false, "Expected class name formatted with /, not . " + className);
       }
     }
 
-    return new Iterable<Entrypoint>() {
-      @Override
-      public Iterator<Entrypoint> iterator() {
-        final Atom mainMethod = Atom.findOrCreateAsciiAtom("main");
-        return new Iterator<Entrypoint>() {
-          private int index = 0;
+    return () -> {
+      final Atom mainMethod = Atom.findOrCreateAsciiAtom("main");
+      return new Iterator<Entrypoint>() {
+        private int index = 0;
 
-          @Override
-          public void remove() {
-            Assertions.UNREACHABLE();
-          }
+        @Override
+        public void remove() {
+          Assertions.UNREACHABLE();
+        }
 
-          @Override
-          public boolean hasNext() {
-            return index < classNames.length;
-          }
+        @Override
+        public boolean hasNext() {
+          return index < classNames.length;
+        }
 
-          @Override
-          public Entrypoint next() {
-            TypeReference T = TypeReference.findOrCreate(loaderRef, TypeName.string2TypeName(classNames[index++]));
-            MethodReference mainRef = MethodReference.findOrCreate(T, mainMethod, Descriptor
-                .findOrCreateUTF8("([Ljava/lang/String;)V"));
-            return new DefaultEntrypoint(mainRef, cha);
-          }
-        };
-      }
+        @Override
+        public Entrypoint next() {
+          TypeReference T = TypeReference.findOrCreate(loaderRef, TypeName.string2TypeName(classNames[index++]));
+          MethodReference mainRef = MethodReference.findOrCreate(T, mainMethod, Descriptor
+              .findOrCreateUTF8("([Ljava/lang/String;)V"));
+          return new DefaultEntrypoint(mainRef, cha);
+        }
+      };
     };
   }
 
@@ -282,15 +274,13 @@ public class Util {
       System.err.println("subgraph: ");
       System.err.println(subG.toString());
       System.err.println("nodeDiff: ");
-      for (Iterator it = nodeDiff.iterator(); it.hasNext();) {
-        System.err.println(it.next().toString());
+      for (T t : nodeDiff) {
+        System.err.println(t.toString());
       }
       Assertions.productionAssertion(nodeDiff.isEmpty(), "bad superset, see tracefile\n");
     }
 
-    for (Iterator<? extends T> subNodes = subG.iterator(); subNodes.hasNext();) {
-      T m = subNodes.next();
-
+    for (T m : subG) {
       Set<T> succDiff = setify(subG.getSuccNodes(m));
       succDiff.removeAll(setify(supG.getSuccNodes(m)));
       if (!succDiff.isEmpty()) {
@@ -305,8 +295,8 @@ public class Util {
         System.err.println("subgraph: ");
         System.err.println(subG.toString());
         System.err.println("predDiff: ");
-        for (Iterator it = predDiff.iterator(); it.hasNext();) {
-          System.err.println(it.next().toString());
+        for (T t : predDiff) {
+          System.err.println(t.toString());
         }
         Assertions.UNREACHABLE("bad superset for predecessors of " + m + ":" + predDiff);
       }

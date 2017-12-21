@@ -12,7 +12,6 @@ package com.ibm.wala.client;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.jar.JarFile;
 
 import com.ibm.wala.analysis.pointers.BasicHeapGraph;
@@ -125,12 +124,7 @@ public abstract class AbstractAnalysisEngine<I extends InstanceKey> implements A
    */
   private HeapGraph heapGraph;
 
-  private EntrypointBuilder entrypointBuilder = new EntrypointBuilder() {
-    @Override
-    public Iterable<Entrypoint> createEntrypoints(AnalysisScope scope, IClassHierarchy cha) {
-      return makeDefaultEntrypoints(scope, cha);
-    }
-  };
+  private EntrypointBuilder entrypointBuilder = this::makeDefaultEntrypoints;
 
   protected abstract CallGraphBuilder<I> getCallGraphBuilder(IClassHierarchy cha, AnalysisOptions options, IAnalysisCacheView cache2);
 
@@ -166,8 +160,8 @@ public abstract class AbstractAnalysisEngine<I extends InstanceKey> implements A
         .getClassLoader());
 
     // add standard libraries
-    for (int i = 0; i < j2seLibs.length; i++) {
-      scope.addToScope(scope.getPrimordialLoader(), j2seLibs[i]);
+    for (Module j2seLib : j2seLibs) {
+      scope.addToScope(scope.getPrimordialLoader(), j2seLib);
     }
 
     // add user stuff
@@ -215,8 +209,7 @@ public abstract class AbstractAnalysisEngine<I extends InstanceKey> implements A
    */
   protected void addApplicationModulesToScope() {
     ClassLoaderReference app = scope.getApplicationLoader();
-    for (Iterator it = moduleFiles.iterator(); it.hasNext();) {
-      Object o = it.next();
+    for (Object o : moduleFiles) {
       if (!(o instanceof Module)) {
         Assertions.UNREACHABLE("Unexpected type: " + o.getClass());
       }
@@ -272,7 +265,7 @@ public abstract class AbstractAnalysisEngine<I extends InstanceKey> implements A
   }
 
   public SDG<I> getSDG(DataDependenceOptions data, ControlDependenceOptions ctrl) {
-    return new SDG<I>(getCallGraph(), getPointerAnalysis(), data, ctrl);
+    return new SDG<>(getCallGraph(), getPointerAnalysis(), data, ctrl);
   }
   
   public String getExclusionsFile() {

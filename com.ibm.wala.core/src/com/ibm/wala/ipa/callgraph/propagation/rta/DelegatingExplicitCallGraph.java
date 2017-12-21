@@ -10,7 +10,6 @@
  *******************************************************************************/
 package com.ibm.wala.ipa.callgraph.propagation.rta;
 
-import java.util.Iterator;
 import java.util.Set;
 
 import com.ibm.wala.classLoader.CallSiteReference;
@@ -51,10 +50,9 @@ public class DelegatingExplicitCallGraph extends ExplicitCallGraph {
   }
 
   /**
-   * In this implementation, super.targets is a mapping from call site ->
+   * In this implementation, super.targets is a mapping from call site -&gt;
    * Object, where Object is a
    * <ul>
-   * A Mapping from call site -> Object, where Object is a
    * <li>CGNode if we've discovered exactly one target for the site
    * <li> or an IntSet of node numbers if we've discovered more than one target
    * for the site.
@@ -73,8 +71,7 @@ public class DelegatingExplicitCallGraph extends ExplicitCallGraph {
     @Override
     public MutableSharedBitVectorIntSet getAllTargetNumbers() {
       MutableSharedBitVectorIntSet result = new MutableSharedBitVectorIntSet(super.getAllTargetNumbers());
-      for (Iterator it = targets.iterator(); it.hasNext();) {
-        Object n = it.next();
+      for (Object n : targets) {
         if (n instanceof CallSite) {
           ExplicitNode delegate = (ExplicitNode) ((CallSite) n).getNode();
           IntSet s = DelegatingExplicitCallGraph.this.getPossibleTargetNumbers(delegate, ((CallSite) n).getSite());
@@ -119,8 +116,7 @@ public class DelegatingExplicitCallGraph extends ExplicitCallGraph {
       if (super.getAllTargetNumbers().contains(y)) {
         return true;
       } else {
-        for (Iterator it = targets.iterator(); it.hasNext();) {
-          Object n = it.next();
+        for (Object n : targets) {
           if (n instanceof CallSite) {
             ExplicitNode delegate = (ExplicitNode) ((CallSite) n).getNode();
             IntSet s = DelegatingExplicitCallGraph.this.getPossibleTargetNumbers(delegate,((CallSite) n).getSite());

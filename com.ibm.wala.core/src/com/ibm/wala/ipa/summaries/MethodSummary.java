@@ -40,7 +40,7 @@ public class MethodSummary {
   private ArrayList<SSAInstruction> statements;
 
   /**
-   * Map: value number -> constant
+   * Map: value number -&gt; constant
    */
   private Map<Integer, ConstantValue> constantValues;
 
@@ -82,7 +82,7 @@ public class MethodSummary {
 
   public void addStatement(SSAInstruction statement) {
     if (statements == null) {
-      statements = new ArrayList<SSAInstruction>();
+      statements = new ArrayList<>();
     }
     statements.add(statement);
   }

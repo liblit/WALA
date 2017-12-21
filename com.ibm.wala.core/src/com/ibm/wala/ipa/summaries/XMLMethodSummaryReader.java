@@ -269,7 +269,7 @@ public class XMLMethodSummaryReader implements BytecodeConstants {
     private int nextLocal = -1;
 
     /**
-     * A mapping from String (variable name) -> Integer (local number)
+     * A mapping from String (variable name) -&gt; Integer (local number)
      */
     private Map<String, Integer> symbolTable = null;
 
@@ -417,8 +417,8 @@ public class XMLMethodSummaryReader implements BytecodeConstants {
       Assertions.productionAssertion(governingMethod.getReturnType() != null);
       if (governingMethod.getReturnType().isReferenceType()) {
         SSAInstruction[] statements = governingMethod.getStatements();
-        for (int i = 0; i < statements.length; i++) {
-          if (statements[i] instanceof SSAReturnInstruction) {
+        for (SSAInstruction statement : statements) {
+          if (statement instanceof SSAReturnInstruction) {
             return;
           }
         }
