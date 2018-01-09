@@ -1,0 +1,34 @@
+plugins {
+	id 'com.github.hauner.jarTest' version '1.0.1'
+	id 'de.undercouch.download' version '3.3.0'
+}
+
+sourceSets.test.java.srcDirs = ['src']
+
+
+////////////////////////////////////////////////////////////////////////
+//
+//  download JLex
+//
+
+import de.undercouch.gradle.tasks.download.*
+
+def versionedArchive = 'ajaxslt-0.8.1'
+def packedArchive = "${versionedArchive}.tar.gz"
+
+task downloadJLex(type: Download) {
+	src "http://www.cs.princeton.edu/~appel/modern/java/JLex/current/Main.java"
+	dest 'src/JLex/Main.java'
+	overwrite false
+}
+
+task verifyJLex(type: Verify, dependsOn: downloadJLex) {
+	src downloadJLex.dest
+	checksum 'fe0cff5db3e2f0f5d67a153cf6c783af'
+}
+
+clean {
+	delete downloadJLex.dest.parent
+}
+
+compileTestJava.dependsOn verifyJLex

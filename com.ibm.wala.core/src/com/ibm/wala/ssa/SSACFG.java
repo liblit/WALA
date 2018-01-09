@@ -34,6 +34,7 @@ import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.collections.EmptyIterator;
 import com.ibm.wala.util.collections.HashMapFactory;
 import com.ibm.wala.util.collections.Iterator2Collection;
+import com.ibm.wala.util.collections.Iterator2Iterable;
 import com.ibm.wala.util.collections.MapIterator;
 import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.debug.UnimplementedError;
@@ -120,8 +121,7 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
    * SSABasicBlocks
    */
   private void addPisFromInducedCFG(InducedCFG cfg) {
-    for (Iterator<? extends InducedCFG.BasicBlock> it = cfg.iterator(); it.hasNext();) {
-      InducedCFG.BasicBlock ib = it.next();
+    for (com.ibm.wala.cfg.InducedCFG.BasicBlock ib : cfg) {
       // we rely on the invariant that basic blocks in this cfg are numbered identically as in the source
       // InducedCFG
       BasicBlock b = getBasicBlock(ib.getNumber());
@@ -137,8 +137,7 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
    * SSABasicBlocks
    */
   private void addPhisFromInducedCFG(InducedCFG cfg) {
-    for (Iterator<? extends InducedCFG.BasicBlock> it = cfg.iterator(); it.hasNext();) {
-      InducedCFG.BasicBlock ib = it.next();
+    for (com.ibm.wala.cfg.InducedCFG.BasicBlock ib : cfg) {
       // we rely on the invariant that basic blocks in this cfg are numbered identically as in the source
       // InducedCFG
       BasicBlock b = getBasicBlock(ib.getNumber());
@@ -164,8 +163,7 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
   }
 
   private void recordExceptionTypes(Set<ExceptionHandler> set, IClassLoader loader) {
-    for (Iterator<ExceptionHandler> it = set.iterator(); it.hasNext();) {
-      ExceptionHandler handler = it.next();
+    for (ExceptionHandler handler : set) {
       TypeReference t = null;
       if (handler.getCatchClass() == null) {
         // by convention, in ShrikeCT this means catch everything
@@ -313,7 +311,7 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
         if (localPhis == null) {
           return EmptyIterator.instance();
         } else {
-          LinkedList<SSAPhiInstruction> result = new LinkedList<SSAPhiInstruction>();
+          LinkedList<SSAPhiInstruction> result = new LinkedList<>();
           for (SSAPhiInstruction phi : localPhis) {
             if (phi != null) {
               result.add(phi);
@@ -323,7 +321,7 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
         }
       } else {
         // stackSlotPhis != null
-        LinkedList<SSAPhiInstruction> result = new LinkedList<SSAPhiInstruction>();
+        LinkedList<SSAPhiInstruction> result = new LinkedList<>();
         for (SSAPhiInstruction phi : stackSlotPhis) {
           if (phi != null) {
             result.add(phi);
@@ -417,9 +415,9 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
           SSAPhiInstruction[] old = stackSlotPhis;
           stackSlotPhis = new SSAPhiInstruction[newLength];
           int j = 0;
-          for (int i = 0; i < old.length; i++) {
-            if (old[i] != null) {
-              stackSlotPhis[j++] = old[i];
+          for (SSAPhiInstruction element : old) {
+            if (element != null) {
+              stackSlotPhis[j++] = element;
             }
           }
         }
@@ -441,9 +439,9 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
           SSAPhiInstruction[] old = localPhis;
           localPhis = new SSAPhiInstruction[newLength];
           int j = 0;
-          for (int i = 0; i < old.length; i++) {
-            if (old[i] != null) {
-              localPhis[j++] = old[i];
+          for (SSAPhiInstruction element : old) {
+            if (element != null) {
+              localPhis[j++] = element;
             }
           }
         }
@@ -454,7 +452,7 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
       return piInstructions.get(new RefPathKey(n, this, path));
     }
 
-    private final LinkedList<SSAPiInstruction> blockPiInstructions = new LinkedList<SSAPiInstruction>();
+    private final LinkedList<SSAPiInstruction> blockPiInstructions = new LinkedList<>();
 
     /**
      * 
@@ -511,9 +509,9 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
     public List<SSAInstruction> getAllInstructions() {
       compressPhis();
 
-      ArrayList<SSAInstruction> result = new ArrayList<SSAInstruction>();
-      for (Iterator<? extends SSAInstruction> it = iteratePhis(); it.hasNext();) {
-        result.add(it.next());
+      ArrayList<SSAInstruction> result = new ArrayList<>();
+      for (SSAInstruction inst : Iterator2Iterable.make(iteratePhis())) {
+        result.add(inst);
       }
 
       for (int i = getFirstInstructionIndex(); i <= getLastInstructionIndex(); i++) {
@@ -523,8 +521,8 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
         }
       }
 
-      for (Iterator<? extends SSAInstruction> it = iteratePis(); it.hasNext();) {
-        result.add(it.next());
+      for (SSAInstruction inst : Iterator2Iterable.make(iteratePis())) {
+        result.add(inst);
       }
       return result;
     }
@@ -541,9 +539,9 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
           SSAPhiInstruction[] old = stackSlotPhis;
           stackSlotPhis = new SSAPhiInstruction[size];
           int j = 0;
-          for (int i = 0; i < old.length; i++) {
-            if (old[i] != null) {
-              stackSlotPhis[j++] = old[i];
+          for (SSAPhiInstruction element : old) {
+            if (element != null) {
+              stackSlotPhis[j++] = element;
             }
           }
         }
@@ -556,9 +554,9 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
           SSAPhiInstruction[] old = localPhis;
           localPhis = new SSAPhiInstruction[size];
           int j = 0;
-          for (int i = 0; i < old.length; i++) {
-            if (old[i] != null) {
-              localPhis[j++] = old[i];
+          for (SSAPhiInstruction element : old) {
+            if (element != null) {
+              localPhis[j++] = element;
             }
           }
         }
@@ -567,8 +565,8 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
 
     private int countNonNull(SSAPhiInstruction[] a) {
       int result = 0;
-      for (int i = 0; i < a.length; i++) {
-        if (a[i] != null) {
+      for (SSAPhiInstruction element : a) {
+        if (element != null) {
           result++;
         }
       }
@@ -767,7 +765,7 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
       s.append("BB").append(i).append("[").append(bb.getFirstInstructionIndex()).append("..").append(bb.getLastInstructionIndex())
           .append("]\n");
 
-      Iterator succNodes = getSuccNodes(bb);
+      Iterator<ISSABasicBlock> succNodes = getSuccNodes(bb);
       while (succNodes.hasNext()) {
         s.append("    -> BB").append(((BasicBlock) succNodes.next()).getNumber()).append("\n");
       }
@@ -837,7 +835,7 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
    */
   @Override
   public Iterator<ISSABasicBlock> iterator() {
-    ArrayList<ISSABasicBlock> list = new ArrayList<ISSABasicBlock>();
+    ArrayList<ISSABasicBlock> list = new ArrayList<>();
     for (BasicBlock b : basicBlocks) {
       list.add(b);
     }
@@ -861,7 +859,7 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
       throw new IllegalArgumentException("b == null");
     }
     IBasicBlock<IInstruction> n = delegate.getNode(b.getNumber());
-    final Iterator i = delegate.getPredNodes(n);
+    final Iterator<IBasicBlock<IInstruction>> i = delegate.getPredNodes(n);
     return new Iterator<ISSABasicBlock>() {
       @Override
       public boolean hasNext() {
@@ -870,7 +868,7 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
 
       @Override
       public BasicBlock next() {
-        IBasicBlock n = (IBasicBlock) i.next();
+        IBasicBlock n = i.next();
         int number = n.getNumber();
         return basicBlocks[number];
       }
@@ -903,7 +901,7 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
       throw new IllegalArgumentException("b == null");
     }
     IBasicBlock<IInstruction> n = delegate.getNode(b.getNumber());
-    final Iterator i = delegate.getSuccNodes(n);
+    final Iterator<IBasicBlock<IInstruction>> i = delegate.getSuccNodes(n);
     return new Iterator<ISSABasicBlock>() {
       @Override
       public boolean hasNext() {
@@ -912,7 +910,7 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
 
       @Override
       public ISSABasicBlock next() {
-        IBasicBlock n = (IBasicBlock) i.next();
+        IBasicBlock n = i.next();
         int number = n.getNumber();
         return basicBlocks[number];
       }
@@ -1016,10 +1014,9 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
       throw new IllegalArgumentException("b is null");
     }
     final IBasicBlock<IInstruction> n = delegate.getNode(b.getNumber());
-    final Iterator<IBasicBlock<IInstruction>> i = delegate.getExceptionalSuccessors(n).iterator();
-    final List<ISSABasicBlock> c = new ArrayList<ISSABasicBlock>(getSuccNodeCount(b));
-    for (; i.hasNext();) {
-      final IBasicBlock<IInstruction> s = i.next();
+    final Collection<IBasicBlock<IInstruction>> ss = delegate.getExceptionalSuccessors(n);
+    final List<ISSABasicBlock> c = new ArrayList<>(getSuccNodeCount(b));
+    for (final IBasicBlock<IInstruction> s : ss) {
       c.add(basicBlocks[delegate.getNumber(s)]);
     }
     return c;
@@ -1034,13 +1031,8 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
       throw new IllegalArgumentException("b is null");
     }
     IBasicBlock<IInstruction> n = delegate.getNode(b.getNumber());
-    Function<IBasicBlock<IInstruction>, ISSABasicBlock> f = new Function<IBasicBlock<IInstruction>, ISSABasicBlock>() {
-      @Override
-      public ISSABasicBlock apply(IBasicBlock<IInstruction> object) {
-        return basicBlocks[delegate.getNumber(object)];
-      }
-    };
-    return Iterator2Collection.toSet(new MapIterator<IBasicBlock<IInstruction>, ISSABasicBlock>(delegate
+    Function<IBasicBlock<IInstruction>, ISSABasicBlock> f = object -> basicBlocks[delegate.getNumber(object)];
+    return Iterator2Collection.toSet(new MapIterator<>(delegate
         .getExceptionalPredecessors(n).iterator(), f));
   }
 
@@ -1049,7 +1041,7 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
   }
 
   /**
-   * has exceptional edge src -> dest
+   * has exceptional edge src -&gt; dest
    * 
    * @throws IllegalArgumentException if dest is null
    */
@@ -1065,7 +1057,7 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
   }
 
   /**
-   * has normal edge src -> dest
+   * has normal edge src -&gt; dest
    * 
    * @throws IllegalArgumentException if dest is null
    */
@@ -1089,10 +1081,9 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
       throw new IllegalArgumentException("b is null");
     }
     IBasicBlock<IInstruction> n = delegate.getNode(b.getNumber());
-    final Iterator<IBasicBlock<IInstruction>> i = delegate.getNormalSuccessors(n).iterator();
-    Collection<ISSABasicBlock> c = new ArrayList<ISSABasicBlock>(getSuccNodeCount(b));
-    for (; i.hasNext();) {
-      IBasicBlock<IInstruction> s = i.next();
+    final Collection<IBasicBlock<IInstruction>> ss = delegate.getNormalSuccessors(n);
+    Collection<ISSABasicBlock> c = new ArrayList<>(getSuccNodeCount(b));
+    for (IBasicBlock<IInstruction> s : ss) {
       c.add(basicBlocks[delegate.getNumber(s)]);
     }
     return c;
@@ -1107,10 +1098,9 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
       throw new IllegalArgumentException("b is null");
     }
     IBasicBlock<IInstruction> n = delegate.getNode(b.getNumber());
-    final Iterator<IBasicBlock<IInstruction>> i = delegate.getNormalPredecessors(n).iterator();
-    Collection<ISSABasicBlock> c = new ArrayList<ISSABasicBlock>(getPredNodeCount(b));
-    for (; i.hasNext();) {
-      IBasicBlock<IInstruction> s = i.next();
+    final Collection<IBasicBlock<IInstruction>> ss = delegate.getNormalPredecessors(n);
+    Collection<ISSABasicBlock> c = new ArrayList<>(getPredNodeCount(b));
+    for (IBasicBlock<IInstruction> s : ss) {
       c.add(basicBlocks[delegate.getNumber(s)]);
     }
     return c;
@@ -1121,7 +1111,7 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock>,
    */
   @Override
   public Iterator<ISSABasicBlock> iterateNodes(IntSet s) {
-    return new NumberedNodeIterator<ISSABasicBlock>(s, this);
+    return new NumberedNodeIterator<>(s, this);
   }
 
   @Override

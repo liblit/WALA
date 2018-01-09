@@ -27,8 +27,8 @@ import com.ibm.wala.ssa.analysis.IExplodedBasicBlock;
  * This class has been developed as part of a student project "Studienarbeit" by Markus Herhoffer.
  * It has been adapted and integrated into the WALA project by Juergen Graf.
  *
- * @author Markus Herhoffer <markus.herhoffer@student.kit.edu>
- * @author Juergen Graf <graf@kit.edu>
+ * @author Markus Herhoffer &lt;markus.herhoffer@student.kit.edu&gt;
+ * @author Juergen Graf &lt;graf@kit.edu&gt;
  */
 public final class AnalysisUtil {
 
@@ -76,7 +76,7 @@ public final class AnalysisUtil {
    * @return a Set of all blocks that contain an invoke
    */
   public static Set<IExplodedBasicBlock> extractInvokeBlocks(final ControlFlowGraph<SSAInstruction, IExplodedBasicBlock> cfg) {
-    final HashSet<IExplodedBasicBlock> invokeBlocks = new HashSet<IExplodedBasicBlock>();
+    final HashSet<IExplodedBasicBlock> invokeBlocks = new HashSet<>();
 
     for (final IExplodedBasicBlock block : cfg) {
       if (block.getInstruction() instanceof SSAAbstractInvokeInstruction) {

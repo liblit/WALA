@@ -147,43 +147,37 @@ public abstract class DynamicCallGraphTestBase extends WalaTestCase {
   }
 
   protected void checkEdges(CallGraph staticCG) throws IOException {
-    checkEdges(staticCG, (x) -> true );
+    checkEdges(staticCG, x -> true);
   }
   
   protected void checkEdges(CallGraph staticCG, Predicate<MethodReference> filter) throws IOException {
     final Set<Pair<CGNode,CGNode>> edges = HashSetFactory.make();
-    check(staticCG, new EdgesTest() {
-      @Override
-      public void edgesTest(CallGraph staticCG, CGNode caller, MethodReference calleeRef) {
-          Set<CGNode> nodes = staticCG.getNodes(calleeRef);
-          Assert.assertEquals("expected one node for " + calleeRef, 1, nodes.size());
-          CGNode callee = nodes.iterator().next();
-        
-          Assert.assertTrue("no edge for " + caller + " --> " + callee, staticCG.getPossibleSites(caller, callee).hasNext());
-          Pair<CGNode,CGNode> x = Pair.make(caller, callee);
-          if (! edges.contains(x)) {
-            edges.add(x);
-            System.err.println("found expected edge " + caller + " --> " + callee);
-          }
-      }
+    check(staticCG, (staticCG1, caller, calleeRef) -> {
+        Set<CGNode> nodes = staticCG1.getNodes(calleeRef);
+        Assert.assertEquals("expected one node for " + calleeRef, 1, nodes.size());
+        CGNode callee = nodes.iterator().next();
+      
+        Assert.assertTrue("no edge for " + caller + " --> " + callee, staticCG1.getPossibleSites(caller, callee).hasNext());
+        Pair<CGNode,CGNode> x = Pair.make(caller, callee);
+        if (! edges.contains(x)) {
+          edges.add(x);
+          System.err.println("found expected edge " + caller + " --> " + callee);
+        }
     }, filter);
   }
  
   protected void checkNodes(CallGraph staticCG) throws IOException {
-    checkNodes(staticCG, (x) -> true);
+    checkNodes(staticCG, x -> true);
   }
 
   protected void checkNodes(CallGraph staticCG, Predicate<MethodReference> filter) throws IOException {
     final Set<MethodReference> notFound = HashSetFactory.make();
-    check(staticCG, new EdgesTest() {
-      @Override
-      public void edgesTest(CallGraph staticCG, CGNode caller, MethodReference callee) {
-        boolean checkForCallee = !staticCG.getNodes(callee).isEmpty();
-        if (!checkForCallee) {
-          notFound.add(callee);
-        } else {
-          System.err.println("found expected node " + callee);
-        }
+    check(staticCG, (staticCG1, caller, callee) -> {
+      boolean checkForCallee = !staticCG1.getNodes(callee).isEmpty();
+      if (!checkForCallee) {
+        notFound.add(callee);
+      } else {
+        System.err.println("found expected node " + callee);
       }
     }, filter);
     
@@ -195,6 +189,10 @@ public abstract class DynamicCallGraphTestBase extends WalaTestCase {
     try (final BufferedReader dynamicEdgesFile = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(cgLocation))))) {
       String line;
       loop: while ((line = dynamicEdgesFile.readLine()) != null) {
+        if (line.startsWith("call to") || line.startsWith("return from")) {
+          continue;
+        }
+        
         lines++;
         StringTokenizer edge = new StringTokenizer(line, "\t");
         
@@ -208,12 +206,15 @@ public abstract class DynamicCallGraphTestBase extends WalaTestCase {
             continue loop;
         } else {
           String callerMethod = edge.nextToken();
+          if (callerMethod.startsWith("lambda$")) {
+            continue loop;
+          }
           MethodReference callerRef = MethodReference.findOrCreate(TypeReference.findOrCreate(ClassLoaderReference.Application, "L" + callerClass), Selector.make(callerMethod));
           Set<CGNode> nodes = staticCG.getNodes(callerRef);
           if (! filter.test(callerRef)) {
             continue loop;
           }
-          Assert.assertEquals(1, nodes.size());
+          Assert.assertEquals(callerMethod, 1, nodes.size());
           caller = nodes.iterator().next();
         }
         

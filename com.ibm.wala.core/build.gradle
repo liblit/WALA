@@ -1,19 +1,20 @@
-apply plugin: 'java'
-    
-repositories {
-    mavenCentral()
-}
-
-sourceSets {
-    main {
-        java  {
-    	    srcDir 'src'
-    	    }
-    	}
+sourceSets.main {
+	java.srcDirs = ['src']
+	resources.srcDirs = [
+		'dat',
+		'lib',
+	]
 }
 
 dependencies {
-	compile project(':com.ibm.wala.util')
 	compile project(':com.ibm.wala.shrike')
+	compile project(':com.ibm.wala.util')
 }
 
+tasks.javadoc {
+	dependsOn ':com.ibm.wala.dalvik:compileJava'
+
+	doFirst {
+		classpath += files(project(':com.ibm.wala.dalvik').tasks.compileJava)
+	}
+}

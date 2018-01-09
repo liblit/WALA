@@ -54,7 +54,7 @@ import com.ibm.wala.util.warnings.Warnings;
  */
 public abstract class AbstractRootMethod extends SyntheticMethod {
 
-  final protected ArrayList<SSAInstruction> statements = new ArrayList<SSAInstruction>();
+  final protected ArrayList<SSAInstruction> statements = new ArrayList<>();
 
   private Map<ConstantValue, Integer> constant2ValueNumber = HashMapFactory.make();
 
@@ -100,8 +100,8 @@ public abstract class AbstractRootMethod extends SyntheticMethod {
   public SSAInstruction[] getStatements(SSAOptions options) {
     SSAInstruction[] result = new SSAInstruction[statements.size()];
     int i = 0;
-    for (Iterator<SSAInstruction> it = statements.iterator(); it.hasNext();) {
-      result[i++] = it.next();
+    for (SSAInstruction ssaInstruction : statements) {
+      result[i++] = ssaInstruction;
     }
 
     return result;
@@ -361,11 +361,11 @@ public abstract class AbstractRootMethod extends SyntheticMethod {
 
       @Override
       public Iterator<NewSiteReference> iterateNewSites(CGNode node) {
-        ArrayList<NewSiteReference> result = new ArrayList<NewSiteReference>();
+        ArrayList<NewSiteReference> result = new ArrayList<>();
         SSAInstruction[] statements = getStatements(options.getSSAOptions());
-        for (int i = 0; i < statements.length; i++) {
-          if (statements[i] instanceof SSANewInstruction) {
-            SSANewInstruction s = (SSANewInstruction) statements[i];
+        for (SSAInstruction statement : statements) {
+          if (statement instanceof SSANewInstruction) {
+            SSANewInstruction s = (SSANewInstruction) statement;
             result.add(s.getNewSite());
           }
         }
@@ -373,11 +373,11 @@ public abstract class AbstractRootMethod extends SyntheticMethod {
       }
 
       public Iterator<SSAInstruction> getInvokeStatements() {
-        ArrayList<SSAInstruction> result = new ArrayList<SSAInstruction>();
+        ArrayList<SSAInstruction> result = new ArrayList<>();
         SSAInstruction[] statements = getStatements(options.getSSAOptions());
-        for (int i = 0; i < statements.length; i++) {
-          if (statements[i] instanceof SSAInvokeInstruction) {
-            result.add(statements[i]);
+        for (SSAInstruction statement : statements) {
+          if (statement instanceof SSAInvokeInstruction) {
+            result.add(statement);
           }
         }
         return result.iterator();

@@ -1,0 +1,18 @@
+sourceSets.test {
+	java.srcDirs = ['source']
+	resources.srcDirs = [
+		'data',
+		project(':com.ibm.wala.core.testdata').tasks.compileTestJava,
+		]
+}
+
+dependencies {
+	testCompile 'com.google.android.tools:dx:1.7'
+	testCompile 'junit:junit:4.11'
+	testCompile 'org.osgi:org.osgi.core:4.2.0'
+	testCompile project(':com.ibm.wala.core')
+	testCompile project(':com.ibm.wala.dalvik')
+	testCompile project(':com.ibm.wala.shrike')
+	testCompile project(':com.ibm.wala.util')
+	testCompile project(configuration: 'testArchives', path: ':com.ibm.wala.core.tests')
+}

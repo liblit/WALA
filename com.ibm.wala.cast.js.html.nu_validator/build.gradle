@@ -1,29 +1,18 @@
-apply plugin: 'java'
-    
-repositories {
-    mavenCentral()
-            maven {
-    	    url "https://repo.eclipse.org/content/groups/releases/"
-	    }
-}
-
 sourceSets {
-    main {
-        java  {
-    	    srcDir 'src'
-    	    }
-    	}
+	main.java.srcDirs = ['src']
+	test {
+		java.srcDirs = ['tests']
+		resources.srcDirs = [project(':com.ibm.wala.cast.js.test.data').file('examples-src')]
+	}
 }
 
 dependencies {
-	compile project(':com.ibm.wala.util')
+	compile 'nu.validator.htmlparser:htmlparser:1.4'
 	compile project(':com.ibm.wala.cast')
 	compile project(':com.ibm.wala.cast.js')
-	compile project(':com.ibm.wala.cast.js.rhino.test')
-	compile project(':com.ibm.wala.cast.test')
-	compile project(':com.ibm.wala.cast.js.test')
-	compile project(':com.ibm.wala.core.tests')
-	// https://mvnrepository.com/artifact/nu.validator.htmlparser/htmlparser
-	compile group: 'nu.validator.htmlparser', name: 'htmlparser', version: '1.4'
+	compile project(':com.ibm.wala.util')
+	testCompile project(':com.ibm.wala.cast.test')
+	testCompile project(':com.ibm.wala.core.tests')
+	testCompile project(configuration: 'testArchives', path: ':com.ibm.wala.cast.js.rhino.test')
+	testCompile project(configuration: 'testArchives', path: ':com.ibm.wala.cast.js.test')
 }
-

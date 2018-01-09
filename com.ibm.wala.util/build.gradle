@@ -1,14 +1,9 @@
-apply plugin: 'java'
-    
-repositories {
-    mavenCentral()
-}
+sourceSets.main.java.srcDirs = ['src']
 
-sourceSets {
-    main {
-        java  {
-    	    srcDir 'src'
-    	    }
-    	}
+tasks.javadoc {
+	def coreCompileJava = project(':com.ibm.wala.core').tasks.compileJava
+	dependsOn coreCompileJava
+	doFirst {
+		classpath += files(coreCompileJava)
+	}
 }
-

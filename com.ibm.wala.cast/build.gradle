@@ -1,26 +1,74 @@
-apply plugin: 'java'
-    
-repositories {
-    mavenCentral()
-            maven {
-    	    url "https://repo.eclipse.org/content/groups/releases/"
-	    }
-}
+apply plugin: 'cpp'
 
-sourceSets {
-    main {
-        java  {
-    	    srcDir 'source'
-    	    }
-    	}
-}
+sourceSets.main.java.srcDirs = ['source/java']
 
 dependencies {
-	compile project(':com.ibm.wala.util')
-	compile project(':com.ibm.wala.shrike')
+	compile 'commons-io:commons-io:2.4'
 	compile project(':com.ibm.wala.core')
-	compile project(':com.ibm.wala.core.tests')
-	// https://mvnrepository.com/artifact/commons-io/commons-io
-	compile group: 'commons-io', name: 'commons-io', version: '2.4'
+	compile project(':com.ibm.wala.shrike')
+	compile project(':com.ibm.wala.util')
 }
 
+tasks.javadoc {
+	dependsOn ':com.ibm.wala.cast.js:compileJava'
+
+	doFirst {
+		classpath += files(project(':com.ibm.wala.cast.js').tasks.compileJava)
+	}
+}
+
+def currentJavaHome = org.gradle.internal.jvm.Jvm.current().javaHome
+
+model {
+	repositories {
+		libs(PrebuiltLibraries) {
+			jdk {
+				def jniIncludeDir = "$currentJavaHome/include"
+				headers.srcDir jniIncludeDir
+				binaries.withType(SharedLibraryBinary) {
+					switch (targetPlatform.operatingSystem.name) {
+						case 'linux':
+							headers.srcDirs "$jniIncludeDir/linux"
+							break
+						case 'osx':
+							headers.srcDirs "$jniIncludeDir/darwin"
+							break
+						case 'windows':
+							headers.srcDirs "$jniIncludeDir/win32"
+							break
+					}
+					switch ("$targetPlatform.operatingSystem.name/$targetPlatform.architecture.name") {
+						case 'linux/x86-64':
+							sharedLibraryLinkFile = file("$currentJavaHome/jre/lib/amd64/server/libjvm.so")
+							break
+						case 'osx/x86-64':
+							// TODO: determine JVM library name and location on MacOS
+							// sharedLibraryLinkFile = '???'
+							break
+						case 'windows/x86-64':
+							// TODO: determine JVM library name and location on Windows
+							// sharedLibraryLinkFile = '???'
+							break
+					}
+				}
+			}
+		}
+	}
+	components {
+		cast(NativeLibrarySpec) {
+			sources.cpp {
+				def cSourceDir = 'source/c'
+				source {
+					srcDirs = ["$cSourceDir/jni"]
+					include '*.cpp'
+				}
+				exportedHeaders.srcDirs = ["$cSourceDir/include"]
+				lib library: 'jdk'
+			}
+			binaries.all {
+				// TODO: compute path on following line from 'jdk' library properties somehow
+				linker.args '-Wl,-rpath', "$currentJavaHome/jre/lib/amd64/server"
+			}
+		}
+	}
+}

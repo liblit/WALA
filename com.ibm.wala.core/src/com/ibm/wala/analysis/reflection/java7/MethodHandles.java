@@ -13,7 +13,6 @@ package com.ibm.wala.analysis.reflection.java7;
 import java.lang.ref.SoftReference;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.ibm.wala.cfg.ControlFlowGraph;
@@ -210,32 +209,19 @@ public class MethodHandles {
 
     public Iterator<FieldReference> iterateFields(CGNode node, Predicate<SSAInstruction> filter) {
       return 
-          new MapIterator<SSAInstruction,FieldReference>(
-              new FilterIterator<SSAInstruction>(getIR(node).iterateNormalInstructions(), filter), 
-              new Function<SSAInstruction,FieldReference>() {
-                @Override
-                public FieldReference apply(SSAInstruction object) {
-                  return ((SSAFieldAccessInstruction)object).getDeclaredField();
-                }                
-              });
+          new MapIterator<>(
+              new FilterIterator<>(getIR(node).iterateNormalInstructions(), filter), 
+              object -> ((SSAFieldAccessInstruction)object).getDeclaredField());
     }
     
     @Override
     public Iterator<FieldReference> iterateFieldsRead(CGNode node) {
-      return iterateFields(node, new Predicate<SSAInstruction>() {
-        @Override public boolean test(SSAInstruction o) {
-          return o instanceof SSAGetInstruction;
-        }
-      });
+      return iterateFields(node, SSAGetInstruction.class::isInstance);
     }
     
     @Override
     public Iterator<FieldReference> iterateFieldsWritten(CGNode node) {
-      return iterateFields(node, new Predicate<SSAInstruction>() {
-        @Override public boolean test(SSAInstruction o) {
-          return o instanceof SSAPutInstruction;
-        }
-      });
+      return iterateFields(node, SSAPutInstruction.class::isInstance);
     }
 
     @Override
@@ -283,7 +269,7 @@ public class MethodHandles {
           code.addStatement(insts.LoadMetadataInstruction(code.getNextProgramCounter(), 2, TypeReference.JavaLangInvokeMethodType, ref.getDescriptor()));
           code.addStatement(insts.ReturnInstruction(code.getNextProgramCounter(), 2, false));
         }
-        irs.put(node, new SoftReference<IR>(m.makeIR(node.getContext(), SSAOptions.defaultOptions())));
+        irs.put(node, new SoftReference<>(m.makeIR(node.getContext(), SSAOptions.defaultOptions())));
       }
 
       return irs.get(node).get();
