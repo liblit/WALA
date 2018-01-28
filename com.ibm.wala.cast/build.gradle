@@ -104,3 +104,4 @@ task copyJarsIntoLib(type: Sync) {
 }
 
 assemble.dependsOn copyJarsIntoLib
+clean.dependsOn cleanCopyJarsIntoLib
