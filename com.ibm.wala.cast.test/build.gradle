@@ -1,17 +1,19 @@
-plugins {
-	id 'com.github.hauner.jarTest' version '1.0.1'
-}
-
+apply plugin: 'com.github.hauner.jarTest'
 apply plugin: 'cpp'
+apply plugin: 'eclipse'
+
+eclipse.project.natures 'org.eclipse.pde.PluginNature'
 
 sourceSets.test.java.srcDirs = ['harness-src/java']
 
 dependencies {
-	testCompile 'junit:junit:4.11'
-	testCompile project(':com.ibm.wala.cast')
-	testCompile project(':com.ibm.wala.core')
-	testCompile project(':com.ibm.wala.util')
-	testCompile project(configuration: 'testArchives', path: ':com.ibm.wala.core.tests')
+	testCompile(
+		'junit:junit:4.11',
+		project(':com.ibm.wala.cast'),
+		project(':com.ibm.wala.core'),
+		project(':com.ibm.wala.util'),
+		project(configuration: 'testArchives', path: ':com.ibm.wala.core.tests'),
+		)
 }
 
 // TODO: build following targets for "test"-only, not "main"
@@ -49,7 +51,7 @@ model {
 					srcDirs = ['harness-src/c']
 					include 'smoke.cpp'
 				}
-				generatedBy tasks.generateJniHeaders
+				generatedBy generateJniHeaders
 				['cast', 'jdk'].each {
 					lib project: ':com.ibm.wala.cast', library: it
 				}
@@ -58,11 +60,14 @@ model {
 				withType(StaticLibraryBinarySpec) {
 					buildable = false
 				}
-				all {
-					// TODO: compute path on following line from 'cast' library properties somehow
-					linker.args '-Wl,-rpath', "${project(':com.ibm.wala.cast').buildDir}/libs/cast/shared"
-					// TODO: compute path on following line from 'jdk' library properties somehow
-					linker.args '-Wl,-rpath', "${currentJvm.javaHome}/jre/lib/amd64/server"
+				withType(SharedLibraryBinarySpec) {
+					switch ("$targetPlatform.operatingSystem.name/$targetPlatform.architecture.name") {
+						case 'linux/x86-64':
+							// TODO: compute path on following line from 'cast' library properties somehow
+							linker.args '-Wl,-rpath', "${project(':com.ibm.wala.cast').buildDir}/libs/cast/shared"
+							// TODO: compute path on following line from 'jdk' library properties somehow
+							linker.args '-Wl,-rpath', "${currentJvm.javaHome}/jre/lib/amd64/server"
+					}
 				}
 			}
 		}
@@ -77,18 +82,20 @@ model {
 				}
 			}
 			binaries.all {
-				// TODO: compute path on following line from 'cast' library properties somehow
-				linker.args '-Wl,-rpath', "${project(':com.ibm.wala.cast').buildDir}/libs/cast/shared"
-				// TODO: compute path on following line from 'jdk' library properties somehow
-				linker.args '-Wl,-rpath', "${currentJvm.javaHome}/jre/lib/amd64/server"
+					switch ("$targetPlatform.operatingSystem.name/$targetPlatform.architecture.name") {
+						case 'linux/x86-64':
+							// TODO: compute path on following line from 'cast' library properties somehow
+							linker.args '-Wl,-rpath', "${project(':com.ibm.wala.cast').buildDir}/libs/cast/shared"
+							// TODO: compute path on following line from 'jdk' library properties somehow
+							linker.args '-Wl,-rpath', "${currentJvm.javaHome}/jre/lib/amd64/server"
+					}
 			}
 		}
 	}
-}
 
-// TODO: Java tests in this subproject should depend on the xlator_test library at run time
-
-test {
-	// TODO: compute path on following line from 'xlator_test' library properties somehow
-	systemProperty "java.library.path", "$buildDir/libs/xlator_test/shared"
+	tasks.test {
+		def lib = linkXlator_testSharedLibrary
+		dependsOn lib
+		systemProperty 'java.library.path', lib.destinationDir
+	}
 }

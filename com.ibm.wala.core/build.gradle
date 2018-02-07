@@ -1,3 +1,7 @@
+apply plugin: 'eclipse'
+
+eclipse.project.natures 'org.eclipse.pde.PluginNature'
+
 sourceSets.main {
 	java.srcDirs = ['src']
 	resources.srcDirs = [
@@ -7,14 +11,17 @@ sourceSets.main {
 }
 
 dependencies {
-	compile project(':com.ibm.wala.shrike')
-	compile project(':com.ibm.wala.util')
+	compile(
+		project(':com.ibm.wala.shrike'),
+		project(':com.ibm.wala.util'),
+		)
 }
 
-tasks.javadoc {
-	dependsOn ':com.ibm.wala.dalvik:compileJava'
+javadoc {
+	def dalvik = ':com.ibm.wala.dalvik'
+	dependsOn "$dalvik:compileJava"
 
 	doFirst {
-		classpath += files(project(':com.ibm.wala.dalvik').tasks.compileJava)
+		classpath += files project(dalvik).compileJava
 	}
 }

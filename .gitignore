@@ -1,3 +1,4 @@
+**/.gradle/
 *.DS_Store
 *.class
 *.out
@@ -6,8 +7,11 @@
 */bin/*
 */build/
 *~
+.classpath
 .metadata/
-/.gradle/
+.project
+/*/.settings/org.eclipse.buildship.core.prefs
+/.settings/org.eclipse.buildship.core.prefs
 /build/
 com.ibm.wala.cast.java.jdt.test/
 com.ibm.wala.cast.java.polyglot/lib/
