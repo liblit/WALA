@@ -9,7 +9,7 @@ buildscript {
 
 plugins {
 	id 'com.diffplug.eclipse.mavencentral' version '3.28.2' apply false
-	id 'com.dorongold.task-tree' version '1.5'
+	id 'com.dorongold.task-tree' version '2.0.1'
 	id 'com.github.ben-manes.versions' version '0.39.0'
 	id 'com.github.sherter.google-java-format' version '0.9'
 	id 'de.undercouch.download'
