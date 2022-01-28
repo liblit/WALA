@@ -4,6 +4,7 @@
 //
 
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import org.jetbrains.qodana.tasks.RunInspectionsTask
 
 buildscript { dependencies.classpath(libs.commons.io) }
 
@@ -13,6 +14,7 @@ plugins {
   java
   alias(libs.plugins.file.lister)
   alias(libs.plugins.kotlin.jvm)
+  alias(libs.plugins.qodana)
   alias(libs.plugins.shellcheck)
   alias(libs.plugins.task.tree)
   alias(libs.plugins.versions)
@@ -124,40 +126,13 @@ listOf("check", "spotlessCheck", "spotlessApply").forEach {
 //  use in CI/CD pipelines than for daily use by live WALA developers.
 //
 
+qodana {
+  executable.set("podman")
+}
+
 val runInspections by
-    tasks.registering(Exec::class) {
-      group = "intellij-idea"
-      description = "Run all enabled IntelliJ IDEA inspections on the entire WALA project"
-
-      val ideaDir = file("$rootDir/.idea")
-      inputs.dir("$ideaDir/scopes")
-
-      val inspectionProfile = file("$ideaDir/inspectionProfiles/No_Back_Sliding.xml")
-      inputs.file(inspectionProfile)
-
-      val textResultsFile = file("$buildDir/${name}.txt")
-      outputs.file(textResultsFile)
-
-      // Inspections examine a wide variety of files, not just Java
-      // sources, so this task is out-of-date if nearly any other file has
-      // changed.
-      inputs.files(fileLister.obtainPartialFileTree())
-
-      executable = findProperty("runInspections.IntelliJ-IDEA.command") as String? ?: "idea"
-      args("inspect", rootDir, inspectionProfile, textResultsFile, "-v1", "-format", "plain")
-
-      // The `idea` command above always fails with an
-      // `IllegalArgumentException` arising from
-      // `PlainTextFormatter.getPath`.  Fortunately, this only happens
-      // *after* `idea` has already written out the results file.  So we
-      // should ignore that command"s exit value, and only fail this task
-      // if the results file is missing.
-      isIgnoreExitValue = true
-      doLast {
-        if (!textResultsFile.exists()) {
-          throw GradleException("IntelliJ IDEA command failed without creating $textResultsFile.")
-        }
-      }
+    tasks.existing(RunInspectionsTask::class) {
+      profilePath.set(file("$rootDir/.idea/inspectionProfiles/No_Back_Sliding.xml").toString())
     }
 
 tasks.register("checkInspectionResults") {
