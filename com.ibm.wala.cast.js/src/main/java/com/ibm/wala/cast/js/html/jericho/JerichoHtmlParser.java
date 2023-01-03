@@ -32,8 +32,14 @@ public class JerichoHtmlParser implements IHtmlParser {
 
   static {
     class CAstLoggerProvider implements LoggerProvider {
+
       @Override
-      public Logger getLogger(String arg0) {
+      public Logger getLogger(String name) {
+        return getSourceLogger();
+      }
+
+      @Override
+      public Logger getSourceLogger() {
         class CAstLogger implements Logger {
 
           @Override
