@@ -1,5 +1,4 @@
-import com.ibm.wala.gradle.VerifiedDownload
-import java.net.URI
+import com.ibm.wala.gradle.adHocDownload
 import net.ltgt.gradle.errorprone.errorprone
 
 plugins { id("com.ibm.wala.gradle.java") }
@@ -41,19 +40,17 @@ spotless { java { targetExclude("**/*") } }
 //  download JLex
 //
 
+val jLex =
+    adHocDownload(
+        uri("https://www.cs.princeton.edu/~appel/modern/java/JLex/current"), "Main", ext = "java")
+
 val downloadJLex by
-    tasks.registering(VerifiedDownload::class) {
-      src = URI("https://www.cs.princeton.edu/~appel/modern/java/JLex/current/Main.java")
-      checksum = "fe0cff5db3e2f0f5d67a153cf6c783af"
-      val downloadedSourceDir = layout.buildDirectory.dir(name).map(Directory::toString)
-      inputs.property("downloadedSourceDir", downloadedSourceDir)
-      dest = layout.buildDirectory.dir(name).map { it.file("JLex/Main.java") }
+    tasks.registering(Sync::class) {
+      from(jLex) { eachFile { name = "Main.java" } }
+      into(layout.buildDirectory.dir(name))
     }
 
-sourceSets.test
-    .get()
-    .java
-    .srcDir(downloadJLex.map { it.inputs.properties["downloadedSourceDir"]!! })
+sourceSets.test.get().java.srcDir(downloadJLex.map { it.destinationDir })
 
 ////////////////////////////////////////////////////////////////////////
 //
