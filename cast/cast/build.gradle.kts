@@ -16,7 +16,8 @@ library {
       if (targetMachine.operatingSystemFamily.isMacOs) {
         linkerArgs.add("-Wl,-install_name,@rpath/${nativeLibraryOutput.name}")
       }
-      addJvmLibrary(this@whenElementFinalized)
     }
+
+    addJvmLibrary(project)
   }
 }
