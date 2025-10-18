@@ -89,12 +89,19 @@ shellcheck {
   shellcheckBinary = "shellcheck"
   sourceFiles =
       fileTree(".") {
+        exclude("/.gradle/")
         exclude("**/build")
         include("**/*.sh")
       }
 }
 
 // Markdown
+
+node {
+  download = true
+  version = "24.10.0"
+}
+
 val lintMarkdown by
     tasks.registering(NpxTask::class) {
       group = "verification"
@@ -112,7 +119,10 @@ val lintMarkdown by
 
 tasks.named("check") { dependsOn("buildHealth", lintMarkdown) }
 
-tasks.named("shellcheck") { group = "verification" }
+tasks.named("shellcheck") {
+  group = "verification"
+  dependsOn("nodeSetup")
+}
 
 // install Java reformatter as git pre-commit hook
 tasks.register<Copy>("installGitHooks") {
