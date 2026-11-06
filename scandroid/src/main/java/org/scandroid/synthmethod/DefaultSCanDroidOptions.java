@@ -47,6 +47,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.NonNull;
 import org.scandroid.util.ISCanDroidOptions;
 
 public abstract class DefaultSCanDroidOptions implements ISCanDroidOptions {
@@ -196,7 +197,7 @@ public abstract class DefaultSCanDroidOptions implements ISCanDroidOptions {
    * @param options the options to format
    * @return a string like "DefaultSCanDroidOptions [pdfCG()=false, pdfPartialCG()=false, ...]"
    */
-  public static String dumpString(ISCanDroidOptions options) {
+  public static String dumpString(@NonNull ISCanDroidOptions options) {
     return AccessorsHolder.ACCESSORS_BY_NAME.entrySet().stream()
         .map(
             namedAccessor ->
