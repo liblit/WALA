@@ -47,6 +47,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.NonNull;
 import org.scandroid.util.ISCanDroidOptions;
 
 public abstract class DefaultSCanDroidOptions implements ISCanDroidOptions {
@@ -58,28 +59,29 @@ public abstract class DefaultSCanDroidOptions implements ISCanDroidOptions {
    * initialization overhead for clients that don't use {@link #dumpString(ISCanDroidOptions)}.
    */
   private static class AccessorsHolder {
-    static final ImmutableMap<String, Function<ISCanDroidOptions, Object>> ACCESSORS_BY_NAME =
-        ImmutableMap.ofEntries(
-            Map.entry("pdfCG", ISCanDroidOptions::pdfCG),
-            Map.entry("pdfPartialCG", ISCanDroidOptions::pdfPartialCG),
-            Map.entry("pdfOneLevelCG", ISCanDroidOptions::pdfOneLevelCG),
-            Map.entry("systemToApkCG", ISCanDroidOptions::systemToApkCG),
-            Map.entry("stdoutCG", ISCanDroidOptions::stdoutCG),
-            Map.entry("includeLibrary", ISCanDroidOptions::includeLibrary),
-            Map.entry("separateEntries", ISCanDroidOptions::separateEntries),
-            Map.entry("ifdsExplorer", ISCanDroidOptions::ifdsExplorer),
-            Map.entry("addMainEntrypoints", ISCanDroidOptions::addMainEntrypoints),
-            Map.entry("useThreadRunMain", ISCanDroidOptions::useThreadRunMain),
-            Map.entry("stringPrefixAnalysis", ISCanDroidOptions::stringPrefixAnalysis),
-            Map.entry("testCGBuilder", ISCanDroidOptions::testCGBuilder),
-            Map.entry("useDefaultPolicy", ISCanDroidOptions::useDefaultPolicy),
-            Map.entry("getClasspath", ISCanDroidOptions::getClasspath),
-            Map.entry("getFilename", ISCanDroidOptions::getFilename),
-            Map.entry("getAndroidLibrary", ISCanDroidOptions::getAndroidLibrary),
-            Map.entry("getReflectionOptions", ISCanDroidOptions::getReflectionOptions),
-            Map.entry("getSummariesURI", ISCanDroidOptions::getSummariesURI),
-            Map.entry("classHierarchyWarnings", ISCanDroidOptions::classHierarchyWarnings),
-            Map.entry("cgBuilderWarnings", ISCanDroidOptions::cgBuilderWarnings));
+    static final ImmutableMap<String, Function<@NonNull ISCanDroidOptions, Object>>
+        ACCESSORS_BY_NAME =
+            ImmutableMap.ofEntries(
+                Map.entry("pdfCG", ISCanDroidOptions::pdfCG),
+                Map.entry("pdfPartialCG", ISCanDroidOptions::pdfPartialCG),
+                Map.entry("pdfOneLevelCG", ISCanDroidOptions::pdfOneLevelCG),
+                Map.entry("systemToApkCG", ISCanDroidOptions::systemToApkCG),
+                Map.entry("stdoutCG", ISCanDroidOptions::stdoutCG),
+                Map.entry("includeLibrary", ISCanDroidOptions::includeLibrary),
+                Map.entry("separateEntries", ISCanDroidOptions::separateEntries),
+                Map.entry("ifdsExplorer", ISCanDroidOptions::ifdsExplorer),
+                Map.entry("addMainEntrypoints", ISCanDroidOptions::addMainEntrypoints),
+                Map.entry("useThreadRunMain", ISCanDroidOptions::useThreadRunMain),
+                Map.entry("stringPrefixAnalysis", ISCanDroidOptions::stringPrefixAnalysis),
+                Map.entry("testCGBuilder", ISCanDroidOptions::testCGBuilder),
+                Map.entry("useDefaultPolicy", ISCanDroidOptions::useDefaultPolicy),
+                Map.entry("getClasspath", ISCanDroidOptions::getClasspath),
+                Map.entry("getFilename", ISCanDroidOptions::getFilename),
+                Map.entry("getAndroidLibrary", ISCanDroidOptions::getAndroidLibrary),
+                Map.entry("getReflectionOptions", ISCanDroidOptions::getReflectionOptions),
+                Map.entry("getSummariesURI", ISCanDroidOptions::getSummariesURI),
+                Map.entry("classHierarchyWarnings", ISCanDroidOptions::classHierarchyWarnings),
+                Map.entry("cgBuilderWarnings", ISCanDroidOptions::cgBuilderWarnings));
   }
 
   @Override
